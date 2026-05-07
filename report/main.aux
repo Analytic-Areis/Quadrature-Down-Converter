@@ -1,0 +1,175 @@
+\relax 
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Utility and Need for Quadrature (I-Q) Operation}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Utility of Quadrature (I-Q) Operation}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-A}1}Bandwidth Efficiency}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-A}2}Elimination of Image Filters}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}The Need for I-Q Mixing in Detail}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}1}Solving the ``Negative Frequency'' Overlap}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}2}Mathematical Expression}{1}{}\protected@file@percent }
+\citation{razavi}
+\citation{holzel}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {II-B}3}Recovery of Phase and Magnitude}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Quadrature Oscillator Design (Q2(a))}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Topology Selection: Wide-Band Allpass Quadrature Oscillator}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Block Diagram of the Quadrature Oscillator}}{2}{}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:osc_block}{{1}{2}{}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-A}1}Why this topology instead of the 2-op-amp version?}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Detailed Working Principle}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}1}Phase Shift Mechanism}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}2}Amplitude Stabilization (Nonlinear Feedback)}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Design Calculations}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}1}Frequency Calculation}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}2}Inverter Gain and Clipping}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-C}3}Power Supply ($V_{DD}, V_{SS}$)}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}LTSpice Simulations}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Final LTSpice Schematic of the Quadrature Oscillator.}}{3}{}\protected@file@percent }
+\newlabel{fig:osc_sim}{{2}{3}{}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Transient simulation of the oscillator outputs. The measured period is $5.424\text  { }\mu \text  {s}$, and the calculated phase difference is $-268.49^\circ $ (equivalent to $+91.51^\circ $), confirming the near-perfect $90^\circ $ quadrature relationship.}}{3}{}\protected@file@percent }
+\newlabel{fig:osc_transient}{{3}{3}{}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Detailed phase difference measurement between the I and Q channels.}}{3}{}\protected@file@percent }
+\newlabel{fig:osc_phase_details}{{4}{3}{}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces FFT of the oscillator output $v_{OSC\_I}$. The peak indicates an oscillation frequency of $200.5\text  { kHz}$ with a magnitude of $-11.43\text  { dB}$ and a phase of $146.78^\circ $.}}{3}{}\protected@file@percent }
+\newlabel{fig:osc_fft}{{5}{3}{}{figure.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Justification of Circuit Operation}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Calculated Theoretical Response and Phase Analysis.}}{4}{}\protected@file@percent }
+\newlabel{fig:calculated_graph}{{6}{4}{}{figure.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Justification of Asymmetry and Tuning}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Quadrature Generation (Sine/Cosine)}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Amplitude Stabilization and Simulation}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Hardware Implementation and Measurements (Q2(c))}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces DSO Measurement: Transient waveforms showing the In-Phase and Quadrature signals.}}{4}{}\protected@file@percent }
+\newlabel{fig:dso_transient}{{7}{4}{}{figure.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Component Value Adjustments}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces DSO Measurement: FFT spectrum of the oscillator output.}}{5}{}\protected@file@percent }
+\newlabel{fig:dso_fft}{{8}{5}{}{figure.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Comparison of Resistor Values: SPICE vs. Hardware Implementation}}{5}{}\protected@file@percent }
+\newlabel{tab:resistor_comparison}{{I}{5}{}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Mixer (Switch) Circuit}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Circuit Topology}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}MOSFET Sizing and Parasitic Parameter Optimization (Q3(a))}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-B}1}Determining MOSFET Sizing ($W$ and $L$)}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-B}2}Geometric Layout Formulas for Parasitics}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-B}3}Numerical Calculation and LTspice Parameters}{5}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Optimized MOSFET Parameters for LTspice}}{6}{}\protected@file@percent }
+\newlabel{tab:mosfet_params}{{II}{6}{}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}LTSpice Implementation of NMOS Mixer (Q3(b))}{6}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces LTSpice Schematic of the NMOS Switch Mixer.}}{6}{}\protected@file@percent }
+\newlabel{fig:mixer_schematic}{{9}{6}{}{figure.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Mathematical Derivations}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-E}}Theoretical Calculations for 165 kHz Input}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-F}}Mixer Performance Analysis (Q3(c) and Q3(d))}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-F}1}Explanation of Mixer Operation and Frequency Conversion}{6}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Mixer Component Values and Rationale}}{7}{}\protected@file@percent }
+\newlabel{tab:mixer_components}{{III}{7}{}{table.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Mixer Output for $f_{IN} = 165\text  { kHz}$}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Mixer Output for $f_{IN} = 168\text  { kHz}$}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Mixer Output for $f_{IN} = 169\text  { kHz}$}}{8}{}\protected@file@percent }
+\newlabel{fig:mixer_sweep_below}{{12}{8}{}{figure.12}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VII-F}2}Hardware Realization and DSO Measurements}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Low Pass Filter Design}{8}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Mixer Output for $f_{IN} = 171\text  { kHz}$}}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-A}}Low-Pass RC Filter Design \& Calculations (Q4(a))}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-A}1}Given Component Values (Lab Practical)}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-A}2}Calculation of Actual Cut-off Frequency}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-A}3}Theoretical $3\text  { kHz}$ Design}{8}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Mixer Output for $f_{IN} = 172\text  { kHz}$}}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}LPF Simulation Results (Q4(b) \& Q4(c))}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-C}}Hardware Realization and Measurement (Q4(d))}{9}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Mixer Output for $f_{IN} = 175\text  { kHz}$}}{9}{}\protected@file@percent }
+\newlabel{fig:mixer_sweep_above}{{15}{9}{}{figure.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Hardware Realization of the NMOS Switch Mixer.}}{9}{}\protected@file@percent }
+\newlabel{fig:mixer_hardware}{{16}{9}{}{figure.16}{}}
+\newlabel{fig:mixer_dso_transient}{{17a}{10}{}{subfigure.17.1}{}}
+\newlabel{sub@fig:mixer_dso_transient}{{a}{10}{}{subfigure.17.1}{}}
+\newlabel{fig:mixer_dso_fft}{{17b}{10}{}{subfigure.17.2}{}}
+\newlabel{sub@fig:mixer_dso_fft}{{b}{10}{}{subfigure.17.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Mixer Output DSO Measurements for $175\text  { kHz}$ Input.}}{10}{}\protected@file@percent }
+\newlabel{fig:mixer_dso_output}{{17}{10}{}{figure.17}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-D}}Mixer and LPF Integration \& Iterative Optimization (Q4(e))}{10}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-D}1}Iteration 1: Single-Stage LPF}{10}{}\protected@file@percent }
+\newlabel{fig:mixer_img1}{{18a}{10}{}{subfigure.18.1}{}}
+\newlabel{sub@fig:mixer_img1}{{a}{10}{}{subfigure.18.1}{}}
+\newlabel{fig:mixer_img2}{{18b}{10}{}{subfigure.18.2}{}}
+\newlabel{sub@fig:mixer_img2}{{b}{10}{}{subfigure.18.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Additional Mixer Output Measurements.}}{10}{}\protected@file@percent }
+\newlabel{fig:mixer_additional_outputs}{{18}{10}{}{figure.18}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Low-Pass RC Filter Schematic.}}{10}{}\protected@file@percent }
+\newlabel{fig:lowpass}{{19}{10}{}{figure.19}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-D}2}Iteration 2: Two-Stage Cascaded LPF}{10}{}\protected@file@percent }
+\newlabel{fig:lpf1_transient}{{20a}{11}{}{subfigure.20.1}{}}
+\newlabel{sub@fig:lpf1_transient}{{a}{11}{}{subfigure.20.1}{}}
+\newlabel{fig:lpf1_fft}{{20b}{11}{}{subfigure.20.2}{}}
+\newlabel{sub@fig:lpf1_fft}{{b}{11}{}{subfigure.20.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Low-Pass Filter Simulation Results (Transient and FFT).}}{11}{}\protected@file@percent }
+\newlabel{fig:lpf_sim_results}{{20}{11}{}{figure.20}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {VIII-D}3}Hardware Measurement Verification}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IX}CE BJT Amplifier Design}{11}{}\protected@file@percent }
+\newlabel{fig:lpf_1k}{{21a}{11}{}{subfigure.21.1}{}}
+\newlabel{sub@fig:lpf_1k}{{a}{11}{}{subfigure.21.1}{}}
+\newlabel{fig:lpf_10k}{{21b}{11}{}{subfigure.21.2}{}}
+\newlabel{sub@fig:lpf_10k}{{b}{11}{}{subfigure.21.2}{}}
+\newlabel{fig:lpf_bode}{{21c}{11}{}{subfigure.21.3}{}}
+\newlabel{sub@fig:lpf_bode}{{c}{11}{}{subfigure.21.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces Hardware Measurements for the Low-Pass Filter.}}{11}{}\protected@file@percent }
+\newlabel{fig:lpf_hardware}{{21}{11}{}{figure.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {22}{\ignorespaces Mixer Output with a Single-Stage LPF (Visible High-Frequency Noise).}}{12}{}\protected@file@percent }
+\newlabel{fig:mixer_1lpf}{{22}{12}{}{figure.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces Mixer Output with a Two-Stage Cascaded LPF (Clean IF Envelope).}}{12}{}\protected@file@percent }
+\newlabel{fig:mixer_2lpf}{{23}{12}{}{figure.23}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-A}}Design Constraints \& THD Optimization}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-B}}Mathematical Derivations}{12}{}\protected@file@percent }
+\newlabel{fig:lpf_dso_1}{{24a}{12}{}{subfigure.24.1}{}}
+\newlabel{sub@fig:lpf_dso_1}{{a}{12}{}{subfigure.24.1}{}}
+\newlabel{fig:lpf_dso_2}{{24b}{12}{}{subfigure.24.2}{}}
+\newlabel{sub@fig:lpf_dso_2}{{b}{12}{}{subfigure.24.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces DSO Measurements of the Integrated Mixer and LPF Circuit.}}{12}{}\protected@file@percent }
+\newlabel{fig:mixer_lpf_dso}{{24}{12}{}{figure.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-C}}Hardware Integration \& Verification}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {X}Complete Circuit Prototype Design (Q5)}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {X-A}}Transient and Frequency Simulation Results (Q5(a) \& Q5(b))}{12}{}\protected@file@percent }
+\newlabel{fig:amplifier_circ}{{25a}{13}{}{subfigure.25.1}{}}
+\newlabel{sub@fig:amplifier_circ}{{a}{13}{}{subfigure.25.1}{}}
+\newlabel{fig:lpf_amp_out}{{25b}{13}{}{subfigure.25.2}{}}
+\newlabel{sub@fig:lpf_amp_out}{{b}{13}{}{subfigure.25.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces Final Amplifier Stage Implementation and Output.}}{13}{}\protected@file@percent }
+\newlabel{fig:amp_hardware}{{25}{13}{}{figure.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces Complete Circuit Schematic showing the Oscillator, Mixers, Filters, and Amplifiers.}}{13}{}\protected@file@percent }
+\newlabel{fig:complete_schematic}{{26}{13}{}{figure.26}{}}
+\newlabel{fig:sim_transient_iq}{{27a}{13}{}{subfigure.27.1}{}}
+\newlabel{sub@fig:sim_transient_iq}{{a}{13}{}{subfigure.27.1}{}}
+\newlabel{fig:sim_fft_iq}{{27b}{13}{}{subfigure.27.2}{}}
+\newlabel{sub@fig:sim_fft_iq}{{b}{13}{}{subfigure.27.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {27}{\ignorespaces System Simulation Results demonstrating $90^\circ $ Phase Shift and $5\text  { kHz}$ IF.}}{13}{}\protected@file@percent }
+\newlabel{fig:sim_final_results}{{27}{13}{}{figure.27}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {X-B}}Hardware Realization and Measurements (Q5(c) \& Q5(d))}{13}{}\protected@file@percent }
+\newlabel{fig:dso_vif}{{28a}{14}{}{subfigure.28.1}{}}
+\newlabel{sub@fig:dso_vif}{{a}{14}{}{subfigure.28.1}{}}
+\newlabel{fig:dso_vif_rf}{{28b}{14}{}{subfigure.28.2}{}}
+\newlabel{sub@fig:dso_vif_rf}{{b}{14}{}{subfigure.28.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {28}{\ignorespaces Hardware Measurements of the Mixer and LPF Operations.}}{14}{}\protected@file@percent }
+\newlabel{fig:dso_mixer_operations}{{28}{14}{}{figure.28}{}}
+\newlabel{fig:dso_phase1}{{30a}{14}{}{subfigure.30.1}{}}
+\newlabel{sub@fig:dso_phase1}{{a}{14}{}{subfigure.30.1}{}}
+\newlabel{fig:dso_phase2}{{30b}{14}{}{subfigure.30.2}{}}
+\newlabel{sub@fig:dso_phase2}{{b}{14}{}{subfigure.30.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {30}{\ignorespaces DSO Measurements Verifying the $90^\circ $ I-Q Phase Shift.}}{14}{}\protected@file@percent }
+\newlabel{fig:dso_phase_diff}{{30}{14}{}{figure.30}{}}
+\newlabel{fig:dso_final_cos}{{29a}{14}{}{subfigure.29.1}{}}
+\newlabel{sub@fig:dso_final_cos}{{a}{14}{}{subfigure.29.1}{}}
+\newlabel{fig:dso_final_sin}{{29b}{14}{}{subfigure.29.2}{}}
+\newlabel{sub@fig:dso_final_sin}{{b}{14}{}{subfigure.29.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {29}{\ignorespaces DSO Measurements of the Final Amplified I and Q Components.}}{14}{}\protected@file@percent }
+\newlabel{fig:dso_final_outputs}{{29}{14}{}{figure.29}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {31}{\ignorespaces Final DSO Output: In-Phase (I) and Quadrature-Phase (Q) IF Signals.}}{14}{}\protected@file@percent }
+\newlabel{fig:quadrature_output_dso}{{31}{14}{}{figure.31}{}}
+\bibcite{holzel}{1}
+\bibcite{abidi}{2}
+\bibcite{razavi}{3}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {X-C}}Performance Summary and Comparison (Q5(e))}{15}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Performance Summary and Comparison}}{15}{}\protected@file@percent }
+\newlabel{tab:performance_comparison}{{IV}{15}{}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {XI}Conclusion}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{15}{}\protected@file@percent }
+\gdef \@abspage@last{15}

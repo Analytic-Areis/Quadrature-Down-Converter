@@ -1,0 +1,1354 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{S26 Analog Electronic Circuits -- Course Project\\
+{\large Quadrature Down Converter (QDC)}}
+
+\author{
+    \IEEEauthorblockN{Aryan Bansal}
+    \IEEEauthorblockA{
+        \textit{IIIT Hyderabad}\\
+        Hyderabad, India\\
+        2025102036\\
+        aryan.bansal@students.iiit.ac.in
+    }
+    \and
+    \IEEEauthorblockN{Raghav Aggarwal}
+    \IEEEauthorblockA{
+        \textit{IIIT Hyderabad}\\
+        Hyderabad, India\\
+        2025102076\\
+        raghav.aggarwal@students.iiit.ac.in
+    }
+    \and
+    \IEEEauthorblockN{Sambit Dey}
+    \IEEEauthorblockA{
+        \textit{IIIT Hyderabad}\\
+        Hyderabad, India\\
+        2025112018\\
+        sambit.dey@research.iiit.ac.in
+    }
+}
+
+\maketitle
+
+\begin{abstract}
+This report presents the design, simulation, and hardware realization of a Quadrature Down Converter (QDC), a key building block in modern wireless communication receivers. The proposed system consists of three main subsystems: a quadrature oscillator operating at $200\,\text{kHz}$, an NMOS-based mixer for frequency translation, and RC low-pass filters with a $-3\,\text{dB}$ cutoff at $3\,\text{kHz}$, finally amplified to the required voltage. 
+
+The quadrature oscillator generates two sinusoidal signals with a $90^\circ$ phase difference, forming the in-phase (I) and quadrature-phase (Q) local oscillator components. These signals are used to downconvert an incoming RF signal to an intermediate frequency (IF). The design is validated through LTSpice simulations and hardware implementation using a 741 op-amp and discrete NMOS transistors. 
+
+Experimental results demonstrate a stable output amplitude of approximately $500\,\text{mV}_{PP}$ (peak-to-peak), while maintaining the required $90^\circ$ phase separation between the I and Q channels.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Quadrature Down Converter, Mixer, Quadrature Oscillator, Direct Conversion, Low-Pass Filter, MOSFET Switch
+\end{IEEEkeywords}
+
+%------------------------------------------------------------------
+\section{Introduction}
+
+In modern communication systems such as Bluetooth, Wi-Fi, and FM receivers, signals are transmitted using high-frequency carriers to enable efficient radiation, practical antenna sizes, and improved spectrum utilization. However, the received RF signal must be downconverted to a lower intermediate frequency (IF) for efficient processing. A key enabler of this process is the Quadrature Down Converter (QDC), which mixes the incoming signal with two quadrature local oscillator (LO) signals to produce in-phase (I) and quadrature-phase (Q) baseband components .
+
+Quadrature downconversion provides several advantages over single-phase mixing. By maintaining a $90^\circ$ phase relationship between the I and Q channels, the system can distinguish between positive and negative frequency components, enabling image rejection and single-sideband detection \cite{razavi2011}. This is particularly useful in direct-conversion (zero-IF) architectures, where the desired signal lies in the same spectral region as its image.
+
+In this project, we implement a prototype QDC comprising three main functional blocks:
+\begin{enumerate}
+    \item A quadrature oscillator generating $200\,\text{kHz}$ sinusoidal signals with $90^\circ$ phase separation.
+    \item An NMOS switch-based mixer performing frequency translation.
+    \item RC low-pass filters extracting the intermediate frequency (IF) component.
+    \item NMOS CS-based amplifiers to amplify the signal to the required specifications.
+\end{enumerate}
+
+The complete system is designed, simulated, and validated through hardware implementation. The final output of the system is adjusted to approximately $500\,\text{mV}$ peak-to-peak while maintaining the required $90^\circ$ phase difference between the I and Q channels.
+
+%------------------------------------------------------------------
+\section{Need for Quadrature Downconversion}
+
+In communication systems, transmitting a baseband message signal $m(t)$, requires modulation onto a high-frequency carrier to form a passband signal. The use of high carrier frequencies is essential for efficient transmission, as it enables smaller antenna sizes, better radiation characteristics, and improved bandwidth utilization. Depending on the system architecture, this modulation can take the form of Double Side-Band Suppressed Carrier (DSB-SC), where the modulated signal is defined as $u(t) = Am(t)\cos(2\pi f_c t)$. In this case, the bandwidth of the modulated signal is $2B$, assuming the baseband message bandwidth is $B$. Alternatively, in conventional Amplitude Modulation (AM), a carrier component is explicitly added such that the transmitted signal becomes $u_{AM}(t) = Am(t)\cos(2\pi f_c t) + A_c\cos(2\pi f_c t)$. This allows the message to be demodulated using a simple envelope detector, provided that the transmitter power is sufficient and the modulation index $a_{mod} = \frac{A|\min_t m(t)|}{A_c}$ is less than or equal to 1.
+
+At the receiver, processing these high-frequency passband signals directly is difficult due to increased circuit complexity and power consumption. Therefore, the received signal is downconverted to a lower intermediate frequency (IF) or directly to baseband. In a standard coherent demodulation approach, the passband received signal is multiplied by a synchronized local carrier, such as $2\cos(2\pi f_c t)$. This single-phase mixing yields an intermediate signal containing both baseband and high-frequency terms:
+\[
+u(t)\cos(2\pi f_c t) = Am(t)\cos^2(2\pi f_c t) = \frac{Am(t)}{2}(1 + \cos(4\pi f_c t))
+\]
+Passing this resultant signal through a low-pass filter of bandwidth $B$ removes the high-frequency components to yield a scaled version of the original message signal $m(t)$.
+
+Expressed more generally for IF downconversion, an input signal:
+\[
+v_{in} = A_1 \cos(\omega_{in} t)
+\]
+is multiplied with a local oscillator signal:
+\[
+v_{LO} = A_2 \cos(\omega_{osc} t)
+\]
+resulting in:
+\[
+v_{out} = v_{in} \cdot v_{LO} = \frac{A_1 A_2}{2} \left[ \cos((\omega_{in} - \omega_{osc})t) + \cos((\omega_{in} + \omega_{osc})t) \right]
+\]
+After low-pass filtering, only the difference frequency component $(\omega_{in} - \omega_{osc})$ is retained. However, this single-channel approach suffers from critical limitations such as ambiguity between desired and image frequencies, and an inability to fully recover phase information for complex modulation schemes.
+
+Quadrature downconversion overcomes these limitations by splitting the local oscillator into two signals that are $90^\circ$ out of phase. The input signal is then mixed with both signals to produce in-phase (I) and quadrature-phase (Q) components:
+\[
+v_{IF,I} = v_{in} \cdot v_{OSC,I} = \frac{A_1 A_2}{2} \left[ \cos(\omega_{IF} t) + \cos((\omega_{in} + \omega_{osc})t) \right]
+\]
+\[
+v_{IF,Q} = v_{in} \cdot v_{OSC,Q} = \frac{A_1 A_2}{2} \left[ \sin((\omega_{in} + \omega_{osc})t) - \sin(\omega_{IF} t) \right]
+\]
+where $\omega_{IF} = \omega_{in} - \omega_{osc}$. After low-pass filtering, the I and Q components retain a $90^\circ$ phase relationship inherited from the quadrature local oscillator signals:
+\[
+v_{IF}(t) = v_{IF,I}(t) + j\,v_{IF,Q}(t)
+\]
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.42\textwidth]{Part1_graph.png}
+\caption{Quadrature oscillator schematic implemented in LTSpice}
+\label{fig:part1_graph}
+\end{figure}
+
+This complex representation retains both the amplitude and phase information of the original signal. By preserving these components, quadrature mixing enables accurate demodulation, effective image rejection, improved signal discrimination, and full compatibility with modern digital modulation techniques.
+%------------------------------------------------------------------
+\section{Quadrature Oscillator Design (Q2)}
+%------------------------------------------------------------------
+
+\subsection{Topology and Working Principle}
+
+The quadrature oscillator used in this design is based on a two-integrator loop structure implemented using op-amps. The circuit consists of two cascaded integrator stages (U3 and U2), followed by an inverting amplifier stage (U1) that completes the feedback loop.
+
+Each integrator stage introduces a phase shift of approximately $90^\circ$ at the oscillation frequency. The output of the second integrator is fed into the inverting amplifier, introducing an additional 180° phase shift. As a result, the total phase shift around the loop becomes 360° (or equivalently 0°), thereby satisfying the condition for sustained oscillations. The loop gain is maintained close to unity so that the oscillations remain stable.
+
+This structure naturally generates two signals that are 90° out of phase, which are used as the in-phase (I) and quadrature-phase (Q) components. In practice, a diode-based nonlinear feedback network is included to stabilize the amplitude of oscillation and improve waveform quality to reduce amplitude which may effect the slew rate of the op-amp(s).
+
+\subsection{Working of the Circuit}
+
+\begin{enumerate}
+
+\item \textbf{Integrator Loop Formation:}
+The op-amps U3 and U2 act as RC integrators and form the frequency-selective portion of the loop.
+
+\item \textbf{Feedback and Oscillation Condition:}
+The output of U2 is fed into U1, which completes the feedback loop and sustains oscillations as discussed earlier.
+
+\item \textbf{Generation of Quadrature Signals:}
+The outputs are taken from U3 and U2. Since each stage introduces a 90° phase shift, the two signals are naturally in quadrature and serve as $V_{OSCI}$ and $V_{OSCQ}$.
+
+\item \textbf{Startup Behaviour:}
+At power-up, small disturbances such as thermal noise or initial conditions are amplified because the loop gain is slightly greater than one. This causes the oscillation amplitude to grow with time.
+
+\item \textbf{Amplitude Stabilization using Diodes:}
+A pair of diodes is placed in the feedback path of U1 to regulate the oscillation amplitude.
+\begin{itemize}
+\item At low amplitudes, the diodes are OFF and the loop gain remains greater than unity, allowing oscillations to build.
+\item As the amplitude increases, the diodes begin to conduct, effectively reducing the feedback resistance.
+\item This reduces the loop gain toward unity and prevents further growth of the oscillation amplitude.
+\end{itemize}
+
+\item \textbf{Waveform Shaping:}
+Without amplitude control, the op-amps would saturate, producing a triangular waveform. The diode-based feedback keeps the circuit in the linear region, resulting in a smoother and nearly sinusoidal output.
+
+\item \textbf{Practical Output:}
+In simulation, the oscillator produces signals at approximately 200 kHz with an amplitude of about 800 mV$_{PP}$. In hardware, the measured amplitude is slightly higher, at around 950 mV$_{PP}$, with a phase difference close to 91°.
+
+\end{enumerate}
+
+Thus, the circuit produces two stable sinusoidal signals at the desired frequency with a 90° phase difference, suitable for use as quadrature local oscillator signals in the QDC.
+
+
+\subsection{Oscillation Frequency Derivation}
+
+To determine the oscillation frequency, we consider the loop formed by the two integrator stages and the feedback network. Assuming identical RC time constants:
+
+\[
+R_1C_1 = R_2C_2 = R_3C_3 = RC
+\]
+
+the loop gain of the system can be expressed as:
+
+
+\begin{equation}
+AB = -\frac{1}{j\omega RC} \cdot \frac{1}{1 + j\omega RC} \cdot \left(1 + \frac{1}{j\omega RC}\right)
+\end{equation}
+
+
+For sustained oscillations, the Barkhausen criterion requires that:
+
+\[
+|AB| = 1, \quad \angle AB = 0^\circ
+\]
+Applying the magnitude condition gives:
+
+\begin{equation}
+\omega_{osc} = \frac{1}{RC}
+\end{equation}
+
+or equivalently,
+
+\begin{equation}
+f_{osc} = \frac{1}{2\pi RC}
+\end{equation}
+
+For a target frequency of 200 kHz, we choose:
+
+\[
+C = 27\,\text{pF}
+\]
+
+Substituting into the equation:
+
+
+\begin{equation}
+R = \frac{1}{2\pi \cdot 200 \times 10^3 \cdot 27 \times 10^{-12}} \approx 29.5~\text{k}\Omega
+\end{equation}
+
+This value represents the ideal case. In practice, the finite gain-bandwidth of the UA741 causes deviations from ideal integrator behavior, introducing additional phase lag and reducing the effective loop gain.
+
+To compensate for this non-ideality, the resistance values were adjusted experimentally. In the final design, $R = 50~\text{k}\Omega$ was used in the integrator stages, which, along with the non-ideal characteristics of the op-amp and the diode-based feedback network, results in stable oscillations close to the desired $200~\text{kHz}$.
+
+The deviation from the theoretical value is mainly due to:
+\begin{itemize}
+\item finite gain-bandwidth of the UA741,
+\item phase shift introduced by practical components,
+\item nonlinear loading due to diode-based amplitude stabilization.
+\end{itemize}
+
+Despite these non-idealities, both simulation and hardware results confirm operation within approximately 1\% of the target frequency of 200 kHz.
+
+
+\subsection{Quadrature Phase Derivation}
+
+The quadrature relationship between the two outputs arises from the frequency-dependent behavior of the RC networks in the integrator stages.
+
+At the oscillation frequency $\omega = \frac{1}{RC}$, the feedback network can be viewed as a combination of low-pass and high-pass responses.
+
+\begin{enumerate}
+
+\item \textbf{Low-Pass Behaviour:}  
+One stage behaves like a low-pass filter with transfer function:
+\[
+H_{LP}(j\omega) = \frac{1}{1 + j\omega RC}
+\]
+
+The phase of this transfer function is:
+\[
+\angle H_{LP} = -\tan^{-1}(\omega RC)
+\]
+
+At $\omega = \frac{1}{RC}$:
+\[
+\angle H_{LP} = -45^\circ
+\]
+
+\item \textbf{High-Pass Behaviour:}  
+Another part of the network behaves like a high-pass filter with transfer function:
+\[
+H_{HP}(j\omega) = \frac{j\omega RC}{1 + j\omega RC}
+\]
+
+The phase of this transfer function is:
+\[
+\angle H_{HP} = \tan^{-1}\left(\frac{1}{\omega RC}\right)
+\]
+
+At $\omega = \frac{1}{RC}$:
+\[
+\angle H_{HP} = +45^\circ
+\]
+
+\item \textbf{Phase Difference:}  
+The phase difference between the two signals is:
+\[
+\Delta \phi = \angle H_{HP} - \angle H_{LP}
+\]
+
+\[
+\Delta \phi = 45^\circ - (-45^\circ) = 90^\circ
+\]
+
+\end{enumerate}
+
+This confirms that the two oscillator outputs are $90^\circ$ out of phase.
+The measured phase difference in hardware is approximately $-91.9^\circ$, which closely matches the theoretical result.
+
+\subsection{Component Values}
+
+Table~\ref{tab:qosc_values} summarizes the component values used in the quadrature oscillator design.
+
+\begin{table}[h]
+\centering
+\caption{Quadrature Oscillator Component Values}
+\label{tab:qosc_values}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Value Used} & \textbf{Remark} \\
+\hline
+$R_{osc}$ & $50\,\text{k}\Omega$ & Tuned for 200\,kHz oscillation \\
+\hline
+$C_{osc}$ & $10\,\text{nF}$ & Selected capacitor value \\
+\hline
+Coupling Capacitor & $1\,\text{nF}$ & Used for signal coupling \\
+\hline
+Load Resistor ($R_L$) & $1\,\text{k}\Omega$ & Output load \\
+\hline
+Supply Voltage ($V_{DD}$) & $\pm 12\,\text{V}$ & Dual supply for op-amp \\
+\hline
+\end{tabular}
+\end{table}
+
+\vspace{0.1cm}
+\subsection{LTSpice Simulation Results}
+
+Fig.~\ref{fig:ltspice_schematic} shows the LTSpice implementation of the quadrature oscillator circuit.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.42\textwidth]{LTSpiceQ2.png}
+\caption{Quadrature oscillator schematic implemented in LTSpice}
+\label{fig:ltspice_schematic}
+\end{figure}
+
+Fig.~\ref{fig:ltspice_iq} shows the simulated in-phase (I) and quadrature-phase (Q) oscillator outputs. The results verify sinusoidal oscillation with approximately $90^\circ$ phase separation.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{LTSpice_I_Q.png}
+\caption{LTSpice transient response of in-phase and quadrature-phase oscillator outputs}
+\label{fig:ltspice_iq}
+\end{figure}
+
+Fig.~\ref{fig:fft_sim} and Fig.~\ref{fig:fft_sim2} show the FFT spectrum of the oscillator outputs. A dominant spectral component is observed at 200\,kHz, validating the oscillator frequency.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{I_Q_FFT.png}
+\caption{FFT spectrum of quadrature oscillator outputs}
+\label{fig:fft_sim}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{I_Q_FFT_2.png}
+\caption{Additional FFT analysis of oscillator outputs}
+\label{fig:fft_sim2}
+\end{figure}
+
+Fig.~\ref{fig:harmonic_distortion} shows the harmonic distortion (2.3 - 3.3\%) observed in the oscillator output. The presence of higher-order harmonics is attributed to non-ideal op-amp characteristics and component tolerances.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{Harmonic_Distortion.png}
+\caption{Harmonic distortion observed in oscillator output}
+\label{fig:harmonic_distortion}
+\end{figure}
+
+\vspace{0.3cm}
+
+\subsection{Hardware Implementation and Measurement Results}
+
+Fig.~\ref{fig:hardware_model} shows the hardware implementation of the quadrature oscillator circuit using 741 op-amps and passive components.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.3\textwidth, angle=90]{Hardware_Quadrature_Oscillator.png}
+\caption{Hardware implementation of quadrature oscillator}
+\label{fig:hardware_model}
+\end{figure}
+
+Fig.~\ref{fig:dso_iq} and Fig.~\ref{fig:dso_iq2} show the measured in-phase and quadrature-phase waveforms obtained using the DSO. The measured signals maintain approximately $90^\circ$ phase difference.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{DSO_I_Q.png}
+\caption{DSO measurement of I and Q oscillator outputs}
+\label{fig:dso_iq}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{DSO_I_Q_2.png}
+\caption{Additional DSO waveform measurement of I and Q outputs}
+\label{fig:dso_iq2}
+\end{figure}
+
+Fig.~\ref{fig:peak_to_peak} shows the measured peak-to-peak voltage of the oscillator output waveform.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.42\textwidth]{Peak_to_Peak.png}
+\caption{Measured peak-to-peak voltage of oscillator output}
+\label{fig:peak_to_peak}
+\end{figure}
+
+Fig.~\ref{fig:dso_ifft} and Fig.~\ref{fig:dso_qfft} show the FFT measurements obtained from the DSO for the in-phase and quadrature-phase outputs respectively.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{DSO_I_FFT.png}
+\caption{DSO FFT spectrum of in-phase oscillator output}
+\label{fig:dso_ifft}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{DSO_Q_FFT.png}
+\caption{DSO FFT spectrum of quadrature-phase oscillator output}
+\label{fig:dso_qfft}
+\end{figure}
+
+The simulation and hardware results demonstrate successful generation of two sinusoidal signals at approximately 200\,kHz with a phase difference close to $90^\circ$. Minor deviations between simulation and hardware measurements are mainly due to component tolerances, parasitic effects, and non-ideal characteristics of the practical op-amp implementation.
+
+\subsection{Inference}
+
+The quadrature oscillator generates two sinusoidal signals at approximately $200\,\text{kHz}$ with a phase difference of $90^\circ$. The output amplitudes are approximately $800\,\text{mV}_{PP}$ in simulation and $910\,\text{mV}_{PP}$ in hardware, confirming proper oscillator operation.
+
+%------------------------------------------------------------------
+\section{Mixer (Switch) Design}
+\subsection{Operating Principle}
+
+An NMOS transistor is used as a switch-based mixer. The local oscillator signal $V_{\text{osc}}$ is applied to the gate, while the input signal $V_{\text{in}}$ is applied to the source. The intermediate frequency output $V_{\text{IF}}$ is taken at the drain.
+
+The MOSFET operates as a time-varying switch, periodically turning ON and OFF at the oscillator frequency. As a result, the input signal is effectively multiplied by a periodic switching function $s(t)$, which can be approximated as a square wave.
+
+Due to this multiplication, the output contains frequency components at the sum and difference of the input and oscillator frequencies, given by:
+\begin{equation}
+f_{\text{IF}} = f_{\text{LO}} \pm f_{\text{IN}}
+\end{equation}
+
+This frequency translation is the fundamental principle behind mixer operation.
+
+\bigskip
+
+\noindent \textbf{Note:} The switching action also introduces harmonics of the local oscillator, resulting in additional mixing products. However, the dominant components occur at $f_{\text{LO}} \pm f_{\text{IN}}$.
+
+\subsection{Working of the Circuit}
+
+The mixer operates using an NMOS transistor as a controlled switch, driven by the local oscillator signal. The overall operation can be understood step by step as follows:
+
+\begin{enumerate}
+    \item \textbf{Gate Control:}  
+    The oscillator signal $V_{\text{osc}}$ is coupled to the gate of the MOSFET through the capacitor $C_c$. A bias resistor $R_{\text{bias}}$ sets a DC operating point at the gate. By choosing the bias voltage $V_{\text{bias}} \approx V_{TH}$, the is kept near its threshold, allowing it to switch efficiently between ON and OFF states.
+
+    \item \textbf{Switching Action:}  
+    As $V_{\text{osc}}$ varies with time, the gate-to-source voltage becomes:
+    \[
+    V_{GS} = V_{\text{osc}} + V_{\text{bias}} - V_{\text{out}}
+    \]
+    When $V_{GS} > V_{TH}$, the MOSFET turns ON and allows the input signal $V_{\text{in}}$ to pass to the drain. When $V_{GS} < V_{TH}$, the MOSFET turns OFF, effectively blocking the signal. This creates a periodic switching behavior at the oscillator frequency.
+
+    \item \textbf{Frequency Mixing:}  
+    Due to this switching, the input signal is multiplied by a square-wave-like switching function $s(t)$. Since a square wave contains multiple harmonics, the output includes frequency components at:
+    \[
+    f = k f_{\text{osc}} \pm f_{\text{in}}, \quad k = 1,3,5,\dots
+    \]
+    Thus, the circuit produces several mixing products, with the most important ones occurring around $f_{\text{osc}} \pm f_{\text{in}}$.
+
+    \item \textbf{IF Extraction:}  
+    The output at the drain is passed through an RC low-pass filter. This filter removes higher-frequency components and retains only the difference frequency:
+    \[
+    f_{\text{IF}} = |f_{\text{osc}} - f_{\text{in}}|
+    \]
+    This is the desired intermediate frequency used for further processing.
+
+    \item \textbf{Quadrature Operation:}  
+    In practical systems, two such mixer stages can be used in parallel. One is driven by a cosine local oscillator and the other by a sine local oscillator. This produces in-phase ($I$) and quadrature ($Q$) outputs, which preserve phase information of the input signal.
+\end{enumerate}
+
+\bigskip
+
+When the oscillator drives the gate strongly above threshold, the MOSFET operates in its conducting region. The drain current can be approximated as:
+\begin{equation}
+I_d = \frac{K_n}{2} \left[ 2(V_{GS} - V_{TH})V_{DS} - V_{DS}^2 \right]
+\end{equation}
+
+For small input signals and bias near threshold, the output voltage can be approximated as:
+\begin{equation}
+V_{\text{out}} \approx R_L K_n V_{\text{osc}}(t) V_{\text{in}}(t)
+\end{equation}
+
+This shows that the circuit effectively performs multiplication between the oscillator and input signals.
+
+\bigskip
+
+The switching function $s(t)$ can be expressed using a Fourier series as:
+\begin{equation}
+s(t) = \sum_{k=1,3,5,\dots} \frac{1}{k} \sin(2\pi k f_{\text{osc}} t)
+\end{equation}
+
+After filtering, only the fundamental difference component remains, and the output becomes:
+\begin{equation}
+V_{\text{out}}(t) = \frac{R_L K_n A_{\text{osc}} A_{\text{in}}}{2} \sin\left(2\pi (f_{\text{osc}} - f_{\text{in}}) t\right)
+\end{equation}
+
+\subsection{Component Values}
+
+The component values used in the mixer circuit are summarized in Table~\ref{tab:mixer_values}. These values were chosen to ensure proper biasing of the MOSFET near its threshold and to enable effective switching at the local oscillator frequency.
+
+\begin{table}[h]
+\centering
+\caption{Mixer Circuit Component Values}
+\label{tab:mixer_values}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Value} \\
+\hline
+$R_{\text{bias}}$ & $10\,\text{K}\Omega$ \\
+$V_{\text{bias}}$ & $0.38\,\text{V}$ \\
+$C_c$ & $1\,\text{nF}$ \\
+$R_L$ & $1\,\text{k}\Omega$ \\
+$A_{\text{in}}$ & $100\,\text{mV}$ \\
+MOSFET Length ($L$) & $0.18\,\mu\text{m}$ \\
+MOSFET Width ($W$) & $1.8\,\mu\text{m}$ \\
+$V_{th}$ & $\approx 0.37\,\text{V}$ \\
+\hline
+\end{tabular}
+\end{table}
+The bias voltage is selected close to the threshold voltage to ensure that the MOSFET operates at the edge of conduction, allowing efficient switching behavior required for mixing.
+
+
+\subsection{Simulation and Experimental Results}
+
+The NMOS mixer was analyzed using LTSpice simulations and experimentally verified using a Digital Storage Oscilloscope (DSO). A local oscillator frequency of $200\,\text{kHz}$ was used, and the input frequency was varied to observe frequency downconversion.
+
+The intermediate frequency is given by:
+\[
+f_{IF} = |f_{osc} - f_{in}|
+\]
+
+%--------------------------------------
+\subsubsection*{Circuit Implementations}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{LTSpice.png}
+\caption{LTSpice schematic of the NMOS mixer circuit.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{DSO_vin_vout.png}
+\caption{Measured input and output waveforms using DSO.}
+\end{figure}
+
+%--------------------------------------
+\subsubsection*{MOSFET Specifications}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{MOS_Specifications.png}
+\caption{MOSFET device parameters used in simulation.}
+\end{figure}
+
+%--------------------------------------
+\subsubsection*{Intermediate Frequency Output}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{Vif.png}
+\caption{Intermediate frequency output waveform $v_{IF}$.}
+\end{figure}
+
+%--------------------------------------
+\subsubsection*{Frequency Conversion Results}
+
+% ================= 195 kHz =================
+\begin{figure}[H]
+\centering
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{195_200khz.png}
+\caption{LTSpice (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{195_5khz.png}
+\caption{LTSpice (IF)}
+\vspace{0.5em}
+
+\end{subfigure}
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_195_200khz.png}
+\caption{DSO (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_195_5khz.png}
+\caption{DSO (IF)}
+\end{subfigure}
+
+\caption{$f_{in}=195\,\text{kHz}$, $f_{IF}\approx 5\,\text{kHz}$.}
+\end{figure}
+
+% ================= 198 kHz =================
+\begin{figure}[H]
+\centering
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{198_200khz.png}
+\caption{LTSpice (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{198_2khz.png}
+\caption{LTSpice (IF)}
+\end{subfigure}
+
+\vspace{0.5em}
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_198_200khz.png}
+\caption{DSO (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_198_2khz.png}
+\caption{DSO (IF)}
+\end{subfigure}
+
+\caption{$f_{in}=198\,\text{kHz}$, $f_{IF}\approx 2\,\text{kHz}$.}
+\end{figure}
+
+% ================= 199 kHz =================
+\begin{figure}[H]
+\centering
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{199_200khz.png}
+\caption{LTSpice (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_199_200khz.png}
+\caption{DSO (RF)}
+\end{subfigure}
+
+\vspace{0.5em}
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{199_1khz.png}
+\caption{LTSpice (IF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_199_1khz.png}
+\caption{DSO (IF)}
+\end{subfigure}
+
+\caption{$f_{in}=199\,\text{kHz}$, $f_{IF}\approx 1\,\text{kHz}$.}
+\end{figure}
+
+% ================= 201 kHz =================
+\begin{figure}[H]
+\centering
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{201_200khz.png}
+\caption{LTSpice (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_201_200khz.png}
+\caption{DSO (RF)}
+\end{subfigure}
+
+\vspace{0.5em}
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{201_1khz.png}
+\caption{LTSpice (IF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_201_1khz.png}
+\caption{DSO (IF)}
+\end{subfigure}
+
+\caption{$f_{in}=201\,\text{kHz}$, $f_{IF}\approx 1\,\text{kHz}$.}
+\end{figure}
+
+% ================= 202 kHz =================
+\begin{figure}[H]
+\centering
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{202_200khz.png}
+\caption{LTSpice (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{202_2khz.png}
+\caption{LTSpice (IF)}
+\end{subfigure}
+
+\vspace{0.5em}
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_202_200khz.png}
+\caption{DSO (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_202_2khz.png}
+\caption{DSO (IF)}
+\end{subfigure}
+
+\caption{$f_{in}=202\,\text{kHz}$, $f_{IF}\approx 2\,\text{kHz}$.}
+\end{figure}
+
+% ================= 205 kHz =================
+\begin{figure}[H]
+\centering
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{205_200khz.png}
+\caption{LTSpice (RF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_205_200khz.png}
+\caption{DSO (RF)}
+\end{subfigure}
+
+\vspace{0.5em}
+
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{205_5khz.png}
+\caption{LTSpice (IF)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{DSO_205_5khz.png}
+\caption{DSO (IF)}
+\end{subfigure}
+
+\caption{$f_{in}=205\,\text{kHz}$, $f_{IF}\approx 5\,\text{kHz}$.}
+\end{figure}
+
+%--------------------------------------
+\subsection*{Inference}
+
+The results obtained from both LTSpice simulations and DSO measurements clearly demonstrate the frequency translation capability of the NMOS switch-based mixer.
+
+For all tested input frequencies, the output consistently exhibits a dominant component at the intermediate frequency given by
+\[
+f_{IF} = |f_{osc} - f_{in}|.
+\]
+
+The transient waveforms show a clear amplitude-modulated envelope corresponding to this difference frequency, which is characteristic of mixing operation. Additionally, the FFT analysis confirms the presence of the expected IF component while higher-order components are significantly attenuated.
+
+A strong agreement is observed between simulation and experimental results, validating the accuracy of the design and the correct switching behavior of the MOSFET.
+
+Overall, the NMOS transistor effectively operates as a switch-based mixer, achieving reliable and accurate frequency downconversion.
+
+%------------------------------------------------------------------
+\section{Low-Pass Filter Design}
+
+\subsection{Design}
+
+A low-pass filter (LPF) is designed to extract the intermediate frequency (IF) component from the mixer output while attenuating higher-frequency mixing products. The target cutoff frequency is chosen as:
+\[
+f_c = 3\,\text{kHz}
+\]
+
+The basic transfer function of a first-order RC low-pass filter is given by:
+\[
+H(j\omega) = \frac{V_{\text{out}}}{V_{\text{in}}}
+= \frac{1}{1 + j\omega RC}
+\]
+
+and the cutoff frequency is:
+\[
+f_c = \frac{1}{2\pi RC}
+\]
+
+\subsection{Component Selection}
+
+For practical implementation, a convenient capacitor value is selected:
+\[
+C = 10\,\text{nF}
+\]
+
+The corresponding resistor value is calculated as:
+\[
+R = \frac{1}{2\pi f_c C}
+= \frac{1}{2\pi \cdot 3000 \cdot 10 \times 10^{-9}}
+= 5305\,\Omega
+\]
+
+Thus, the nominal component values are:
+\[
+R \approx 5.3\,\text{k}\Omega, \quad C = 10\,\text{nF}
+\]
+
+\subsection{Implemented Filter Structure}
+
+Instead of a single-stage RC filter, the implemented circuit uses \textbf{two cascaded RC stages} to improve filtering performance.
+
+The circuit consists of:
+\begin{itemize}
+    \item $R_1 = 5.3\,\text{k}\Omega$, $C_1 = 10\,\text{nF}$
+    \item $R_2 = 5.3\,\text{k}\Omega$, $C_2 = 10\,\text{nF}$
+\end{itemize}
+
+This configuration effectively creates a higher-order low-pass filter, providing:
+\begin{itemize}
+    \item Sharper attenuation of high-frequency components
+    \item Better suppression of unwanted mixing products (e.g., $f_{osc} + f_{in}$)
+\end{itemize}
+
+\subsection{Design Justification}
+
+The chosen cutoff frequency ensures that the desired IF range (approximately $1$--$5\,\text{kHz}$) lies within the passband of the filter. At the same time, higher-frequency components generated during mixing are significantly attenuated.
+
+The use of cascaded RC stages enhances the selectivity of the filter without significantly increasing circuit complexity, making it suitable for practical implementation.
+
+\subsection{Working of the Circuit}
+
+The RC low-pass filter operates based on frequency-dependent voltage division between the resistor and capacitor. Since the impedance of the capacitor varies with frequency, it determines how the input signal is distributed across the circuit components.
+
+\begin{enumerate}
+    \item \textbf{Capacitive Reactance:}  
+    The impedance of the capacitor is given by:
+    \[
+    X_C = \frac{1}{2\pi f C}
+    \]
+    As the frequency increases, $X_C$ decreases. At low frequencies, the capacitor presents a high impedance, while at high frequencies, it behaves like a low-impedance path.
+
+    \item \textbf{Low-Frequency Behavior (Pass Band):}  
+    For frequencies well below the cutoff frequency ($f_c = 3\,\text{kHz}$), the capacitive reactance is much larger than the resistance. As a result, most of the input voltage appears across the capacitor, and the output closely follows the input with minimal attenuation and negligible phase shift.
+
+    \item \textbf{High-Frequency Behavior (Stop Band):}  
+    For frequencies much higher than the cutoff frequency, the capacitive reactance becomes very small. The capacitor effectively provides a path to ground, causing the output voltage to drop significantly. This results in strong attenuation of high-frequency components.
+
+    \item \textbf{Cutoff Frequency:}  
+    At the cutoff frequency ($f_c = 3\,\text{kHz}$), the magnitude of the capacitive reactance equals the resistance. The output voltage drops to $\frac{1}{\sqrt{2}}$ of the input (i.e., $-3\,\text{dB}$), and a phase shift of $-45^\circ$ is observed. This point marks the transition between pass-band and stop-band operation.
+
+    \item \textbf{Application in Mixer Output:}  
+    When connected to the mixer output, the LPF allows the desired intermediate frequency component ($f_{IF} = |f_{osc} - f_{in}|$) to pass, while suppressing higher-frequency components such as $f_{osc} + f_{in}$ and higher-order harmonics. This ensures that only the required downconverted signal is retained.
+
+    \item \textbf{Practical Implementation Note:}  
+    In practice, multiple RC stages may be cascaded to achieve sharper attenuation of high-frequency components, though the fundamental working principle remains unchanged.
+\end{enumerate}
+
+\subsection{Component Values}
+
+\begin{table}[H]
+\centering
+\caption{Low-Pass Filter Component Values}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Value} \\ \hline
+
+$R_1$ & $5.3\,\text{k}\Omega$ \\ \hline
+$C_1$ & $10\,\text{nF}$ \\ \hline
+
+Theoretical Cutoff Frequency $(f_c)$ & $\approx 3\,\text{kHz}$ \\ \hline
+
+Simulated Cutoff Frequency & $3.02\,\text{kHz}$ \\ \hline
+
+Magnitude at Cutoff & $-3.04\,\text{dB}$ \\ \hline
+
+Phase Shift at Cutoff & $\approx -45^\circ$ \\ \hline
+
+Filter Type & First-order RC Low-Pass Filter \\ \hline
+
+\end{tabular}
+\label{tab:lpf_values}
+\end{table}
+
+The resistor and capacitor values were selected to obtain a cutoff frequency close to $3\,\text{kHz}$. 
+Both LTSpice simulation and DSO measurements confirmed the expected low-pass response, with the cutoff occurring near the designed frequency. 
+The measured attenuation and phase shift at cutoff closely matched theoretical predictions for a first-order RC low-pass filter.
+
+\subsection{Simulation and Experimental Results}
+
+\subsubsection{AC Frequency Response Analysis}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{LT Spice.png}
+    \caption{LTSpice schematic used for AC analysis of the RC low-pass filter}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{b.png}
+    \caption{LTSpice AC response of the RC low-pass filter}
+\end{figure}
+
+The AC analysis confirms the low-pass behavior of the designed RC filter. 
+The gain remains nearly constant in the pass-band region and starts decreasing as the frequency approaches the cutoff frequency. 
+The cutoff frequency is observed near $3.02\,\text{kHz}$, where the gain drops to approximately $-3\,\text{dB}$ and the phase shift approaches $-45^\circ$, closely matching the theoretical design.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{DSO_FRA.png}
+    \caption{Experimental frequency response obtained using DSO frequency response analysis}
+\end{figure}
+
+The experimental frequency response obtained from the DSO also exhibits similar low-pass characteristics, validating the practical implementation of the filter circuit.
+
+\vspace{0.5cm}
+
+\subsubsection{Transient Response Analysis}
+
+Transient simulations and measurements were carried out for input frequencies of 
+$1\,\text{kHz}$, $3\,\text{kHz}$, $7\,\text{kHz}$, and $10\,\text{kHz}$ to study the response of the filter in both pass-band and stop-band regions.
+
+%-------------------------------------------------
+
+\textbf{Case 1: $f = 1\,\text{kHz}$}
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{c_1.png}
+        \caption{LTSpice transient response}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{DSO_Low Pass Output.png}
+        \caption{DSO measurement}
+    \end{subfigure}
+    
+    \caption{Transient response of the RC low-pass filter at $1\,\text{kHz}$}
+\end{figure}
+
+At $1\,\text{kHz}$, which is below the cutoff frequency, the output closely follows the input waveform with very little attenuation and negligible phase shift.
+
+\vspace{0.5cm}
+
+%-------------------------------------------------
+
+\textbf{Case 2: $f = 3\,\text{kHz}$}
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{c_2.png}
+        \caption{LTSpice transient response}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{e_1.png}
+        \caption{DSO measurement}
+    \end{subfigure}
+    
+    \caption{Transient response of the RC low-pass filter near cutoff frequency}
+\end{figure}
+
+At approximately the cutoff frequency, the output amplitude decreases to nearly $70.7\%$ of the input amplitude, corresponding to the expected $-3\,\text{dB}$ attenuation. A noticeable phase shift is also observed.
+
+\vspace{0.5cm}
+
+%-------------------------------------------------
+
+\textbf{Case 3: $f = 7\,\text{kHz}$}
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{c_3.png}
+        \caption{LTSpice transient response}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{e_2.png}
+        \caption{DSO measurement}
+    \end{subfigure}
+    
+    \caption{Transient response of the RC low-pass filter at $7\,\text{kHz}$}
+\end{figure}
+
+At $7\,\text{kHz}$, which is above the cutoff frequency, the output signal is significantly attenuated and exhibits increased phase lag due to the filtering action.
+
+\vspace{0.5cm}
+
+%-------------------------------------------------
+
+\textbf{Case 4: $f = 10\,\text{kHz}$}
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{f_1.png}
+        \caption{LTSpice transient response}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{DSO_Low Pass Output 2.png}
+        \caption{DSO measurement}
+    \end{subfigure}
+    
+    \caption{Transient response of the RC low-pass filter at $10\,\text{kHz}$}
+\end{figure}
+
+At $10\,\text{kHz}$, the output amplitude is heavily attenuated, confirming effective suppression of high-frequency components by the low-pass filter.
+
+\vspace{0.5cm}
+
+%-------------------------------------------------
+
+\subsubsection{Inference}
+
+The simulation and experimental results clearly demonstrate the expected behavior of the RC low-pass filter. 
+Signals below the cutoff frequency pass with minimal attenuation, while higher-frequency signals are progressively suppressed. 
+The measured cutoff frequency closely matches the theoretical value of $3\,\text{kHz}$, and the DSO observations show strong agreement with LTSpice simulations. 
+These results validate the correct operation and practical implementation of the designed low-pass filter.
+
+\subsection{Inference}
+
+The designed RC low-pass filter successfully exhibits the expected low-pass characteristics in both simulation and experimental measurements. 
+Signals within the pass-band region experience very little attenuation, while frequencies above the cutoff frequency are strongly suppressed. 
+The observed cutoff frequency is close to the theoretical value of approximately $3\,\text{kHz}$, confirming the correctness of the component selection and filter design.
+
+When connected to the mixer output, the filter effectively removes higher-frequency mixing products and harmonic components, allowing only the desired intermediate-frequency (IF) signal to pass. 
+The close agreement between LTSpice simulations and DSO measurements validates the practical implementation and overall performance of the filter stage.
+
+%------------------------------------------------------------------
+\section{Complete Quadrature Down Conversion Circuit (Q5)}
+
+\subsection{System Architecture}
+
+The complete Quadrature Down Conversion (QDC) circuit is obtained by integrating the quadrature oscillator, NMOS mixer stages, cascaded RC low-pass filters, and amplifier stages into a single receiver architecture. 
+The system converts a high-frequency RF input signal into low-frequency in-phase (I) and quadrature-phase (Q) intermediate-frequency outputs while preserving their phase relationship.
+
+The quadrature oscillator generates two sinusoidal local oscillator signals of equal amplitude and frequency with an approximate phase difference of $90^\circ$. 
+These oscillator outputs are represented as:
+
+\[
+V_{OSCI}=A\cos(\omega_{osc}t)
+\]
+
+\[
+V_{OSCQ}=A\sin(\omega_{osc}t)
+\]
+
+Both oscillator outputs drive two identical NMOS switch-based mixer branches operating in parallel. 
+The same RF input signal is applied to both mixers, while the local oscillator signals differ in phase.
+
+The mixer outputs are passed through cascaded RC low-pass filters that suppress high-frequency mixing products and extract the desired intermediate-frequency component:
+
+\[
+f_{IF}=|f_{osc}-f_{in}|
+\]
+
+The filtered signals are further amplified using common-source amplifier stages to obtain practically measurable outputs.
+
+The final outputs of the system are:
+
+\[
+V_{IFFINAL\_I}
+\]
+
+and
+
+\[
+V_{IFFINAL\_Q}
+\]
+
+which represent the in-phase and quadrature-phase IF signals respectively.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{LTSpice.png}
+\caption{Complete LTSpice schematic of the Quadrature Down Conversion circuit.}
+\label{fig:qdc_complete}
+\end{figure*}
+
+\vspace{0.3cm}
+
+The complete QDC architecture consists of:
+
+\begin{itemize}
+    \item Quadrature oscillator stage
+    \item Two NMOS switch-based mixers
+    \item Cascaded RC low-pass filters
+    \item Common-source amplifier stages
+    \item Separate I-channel and Q-channel signal paths
+\end{itemize}
+
+The overall architecture performs frequency translation while preserving phase information, making it suitable for quadrature receiver and direct-conversion communication applications.
+
+\subsection{Working of the Circuit}
+
+The complete Quadrature Down Conversion (QDC) circuit performs frequency translation by combining the quadrature oscillator, NMOS mixer stages, RC low-pass filters, and amplifier stages into a single signal-processing chain. 
+The circuit converts a high-frequency RF signal into two low-frequency outputs that maintain a phase difference of approximately $90^\circ$.
+
+\begin{enumerate}
+
+\item \textbf{Generation of Quadrature LO Signals:} \\
+
+The operation starts with the quadrature oscillator, which produces two local oscillator signals at nearly $200\,\text{kHz}$. 
+Both signals have almost equal amplitudes and frequencies but differ in phase by approximately $90^\circ$.
+
+The oscillator outputs are represented as:
+
+\[
+V_{OSCI}=A\cos(\omega_{osc}t)
+\]
+
+\[
+V_{OSCQ}=A\sin(\omega_{osc}t)
+\]
+
+where $V_{OSCI}$ is the in-phase local oscillator signal and $V_{OSCQ}$ is the quadrature-phase local oscillator signal.
+
+\item \textbf{Application of RF Input Signal:} \\
+
+The RF input signal is simultaneously applied to both mixer branches. 
+Because the MOSFET gates draw extremely small current, the same RF source can drive both mixers directly without requiring an additional power-divider network.
+
+The RF input signal is given by:
+
+\[
+v_{in}=A_{in}\cos(\omega_{in}t)
+\]
+
+\item \textbf{Frequency Mixing Operation:} \\
+
+Each NMOS transistor acts as a switch controlled by its respective local oscillator signal. 
+As the oscillator waveform alternates, the MOSFET repeatedly switches ON and OFF, effectively multiplying the RF input with the LO signal.
+
+For the I-channel mixer:
+
+\[
+v_{IF,I}\propto \cos(\omega_{in}t)\cos(\omega_{osc}t)
+\]
+
+For the Q-channel mixer:
+
+\[
+v_{IF,Q}\propto \cos(\omega_{in}t)\sin(\omega_{osc}t)
+\]
+
+This multiplication process produces frequency components at both the sum and difference frequencies:
+
+\[
+f_{sum}=f_{in}+f_{osc}
+\]
+
+and
+
+\[
+f_{IF}=|f_{in}-f_{osc}|
+\]
+
+The required downconverted signal is the low-frequency difference component.
+
+\item \textbf{Low-Pass Filtering:} \\
+
+The outputs from both mixers are passed through cascaded RC low-pass filters designed with a cutoff frequency close to $3\,\text{kHz}$. 
+These filters suppress the high-frequency sum components and harmonic products while allowing the desired intermediate-frequency signal to pass.
+
+After filtering, the dominant outputs become:
+
+\[
+I_{FINAL}(t)\propto \cos((\omega_{in}-\omega_{osc})t)
+\]
+
+\[
+Q_{FINAL}(t)\propto \sin((\omega_{in}-\omega_{osc})t)
+\]
+
+As a result, the quadrature phase relationship between the two channels is preserved after downconversion.
+
+\item \textbf{Amplification Stage:} \\
+
+The filtered IF signals have relatively small amplitudes. 
+To obtain a practically measurable output level, common-source MOSFET amplifier stages are used after the filter stages. 
+These amplifiers increase the signal amplitude while maintaining the frequency and phase information of the IF outputs.
+
+\item \textbf{Final I-Q Outputs:} \\
+
+The final outputs of the circuit are two low-frequency sinusoidal signals with nearly equal amplitudes and an approximate phase separation of $90^\circ$. 
+Together, these outputs form the I-Q representation of the downconverted signal, which can be used for demodulation and further digital signal processing applications.
+
+\end{enumerate}
+
+\subsection{Complete Circuit Parameters}
+
+\begin{table}[H]
+\centering
+\caption{Complete Circuit Parameters}
+\label{tab:qdc_parameters}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Simulated} & \textbf{Measured} \\
+\hline
+Oscillator Frequency & $200\,\text{kHz}$ & -- \\
+\hline
+$I$-Phase LO Amplitude & $\approx 1\,\text{V}_{pp}$ & -- \\
+\hline
+$Q$-Phase LO Amplitude & $\approx 1\,\text{V}_{pp}$ & -- \\
+\hline
+Input Frequency $(f_{in})$ & $195$--$205\,\text{kHz}$ & -- \\
+\hline
+Intermediate Frequency $(f_{IF})$ & $1$--$5\,\text{kHz}$ & -- \\
+\hline
+RF Input Amplitude & $100\,\text{mV}_{pp}$ & -- \\
+\hline
+$I$-Channel IF Output & $\approx 500\,\text{mV}_{pp}$ & -- \\
+\hline
+$Q$-Channel IF Output & $\approx 500\,\text{mV}_{pp}$ & -- \\
+\hline
+Mixer Bias Voltage $(V_{bias})$ & $0.38\,\text{V}$ & -- \\
+\hline
+Amplifier Bias Voltage & $0.42\,\text{V}$ & -- \\
+\hline
+Supply Voltage & $1.8\,\text{V}$ & -- \\
+\hline
+Gate Coupling Capacitor $(C_C)$ & $1\,\text{nF}$ & -- \\
+\hline
+Low-Pass Filter Capacitor & $10\,\text{nF}$ & -- \\
+\hline
+Low-Pass Filter Resistance & $5.3\,\text{k}\Omega$ & -- \\
+\hline
+Approximate LPF Cutoff Frequency & $\approx 3\,\text{kHz}$ & -- \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Simulation Results}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\linewidth}{\centering [Insert: LTSpice schematic of complete QDC]}}
+    \caption{LTSpice schematic of the complete QDC circuit.}
+    \label{fig:full_schematic}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\linewidth}{\centering [Insert: Transient waveforms: $V_{in}$, $V_{OSCI}$, $V_{OSCQ}$, $I_{FINAL}$, $Q_{FINAL}$]}}
+    \caption{Transient waveforms at key nodes of the complete QDC. The 90$^\circ$ phase separation between $I_{FINAL}$ and $Q_{FINAL}$ is annotated.}
+    \label{fig:full_transient}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\linewidth}{\centering [Insert: FFT of $I_{FINAL}$ and $Q_{FINAL}$]}}
+    \caption{FFT plots of $I_{FINAL}$ and $Q_{FINAL}$ showing the IF frequency peak and the measured phase of each component.}
+    \label{fig:full_fft}
+\end{figure}
+
+\subsection{Inference}
+
+The complete QDC successfully downconverts the input RF signal to an IF frequency equal to $|f_{osc} - f_{in}|$. The final I and Q outputs exhibit the required 90$^\circ$ phase difference and are each approximately 500\,mV$_{PP}$ in amplitude. The low-pass filter effectively suppresses all higher-order mixing products.
+
+%------------------------------------------------------------------
+\section{Performance Comparison}
+%------------------------------------------------------------------
+
+\begin{table}[H]
+\centering
+\caption{Performance Summary: Simulation vs. Measurement}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Parameter} & \textbf{Simulated} & \textbf{Measured} \\
+\midrule
+Oscillator Frequency & 200\,kHz & -- \\
+Oscillator Amplitude (I) & $\approx$1\,V$_{PP}$ & -- \\
+Oscillator Amplitude (Q) & $\approx$1\,V$_{PP}$ & -- \\
+Input Frequency ($f_{in}$) & -- & -- \\
+IF Frequency & -- & -- \\
+Phase Difference (I--Q) & 90$^\circ$ & -- \\
+Final Output Amplitude & 500\,mV$_{PP}$ & -- \\
+Supply Voltage ($V_{DD}$) & 5\,V & -- \\
+$V_{bias}$ & 0.52\,V & -- \\
+$C_C$ & 10\,$\mu$F & -- \\
+LPF Cutoff Frequency & 3\,kHz & -- \\
+\bottomrule
+\end{tabular}
+\label{tab:comparison}
+\end{table}
+
+%------------------------------------------------------------------
+\section{Conclusion}
+%------------------------------------------------------------------
+
+A prototype Quadrature Down Converter was designed, simulated, and partially realized in hardware. The three constituent blocks—a 200\,kHz quadrature oscillator, an NMOS switch mixer, and an RC low-pass filter—each meet their design specifications individually and collectively in the integrated system. The oscillator produces two sinusoidal signals at 200\,kHz with 1\,V$_{PP}$ amplitude and a 90$^\circ$ phase separation. The mixer correctly translates the input frequency to $|f_{osc} - f_{in}|$, and the low-pass filter cleanly extracts the IF component. The final I and Q outputs each achieve 500\,mV$_{PP}$ with a 90$^\circ$ phase difference, validating the QDC design.
+
+This work demonstrates the practical viability of quadrature downconversion as used in modern wireless receivers, confirming the theoretical analysis at every design stage.
+
+%------------------------------------------------------------------
+\section*{Acknowledgment}
+%------------------------------------------------------------------
+
+The authors thank the International Institute of Information Technology, Hyderabad for laboratory facilities and sponsored IEEE access. Special thanks to Prof. Zia Abbas for guidance throughout the Analog Electronic Circuits course, and to the teaching assistants for their helpful feedback.
+
+%------------------------------------------------------------------
+\begin{thebibliography}{00}
+
+\bibitem{abidi1995}
+A. A. Abidi, ``Direct-conversion radio transceivers for digital communications,'' \textit{IEEE Journal of Solid-State Circuits}, vol. 30, no. 12, pp. 1399--1410, Dec. 1995.
+
+\bibitem{razavi2011}
+B. Razavi, \textit{RF Microelectronics}, 2nd ed. Upper Saddle River, NJ, USA: Prentice Hall, 2011, ch. 3--4.
+
+\bibitem{sedra2015}
+A. S. Sedra and K. C. Smith, \textit{Microelectronic Circuits}, 7th ed. New York, NY, USA: Oxford University Press, 2015.
+
+\bibitem{mancini2000}
+R. Mancini, ``Design of op amp sine wave oscillators,'' Texas Instruments, 2000.
+
+\bibitem{holzel1993}
+R. H\"{o}lzel, ``A simple wide-band sine wave quadrature oscillator,'' \textit{IEEE Transactions on Instrumentation and Measurement}, vol. 42, no. 3, pp. 758--760, Jun. 1993.
+
+\end{thebibliography}
+
+\end{document}
